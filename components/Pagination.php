@@ -44,10 +44,10 @@ class Pagination
 
     /**
      * Запуск необходимых данных для навигации
-     * @param type $total <p>Общее количество записей</p>
-     * @param type $currentPage <p>Номер текущей страницы</p>
-     * @param type $limit <p>Количество записей на страницу</p>
-     * @param type $index <p>Ключ для url</p>
+     * @param int $total <p>Общее количество записей</p>
+     * @param int $currentPage <p>Номер текущей страницы</p>
+     * @param int $limit <p>Количество записей на страницу</p>
+     * @param string|int $index <p>Ключ для url</p>
      */
     public function __construct($total, $currentPage, $limit, $index)
     {
@@ -94,14 +94,14 @@ class Pagination
         # Если ссылки создались
         if (!is_null($links)) {
             # Если текущая страница не первая
-            if ($this->current_page > 1)
+            if ($this->current_page >= 1)
             # Создаём ссылку "На первую"
-                $links = $this->generateHtml(1, '&lt;') . $links;
+                $links = $this->generateHtml(1, 'В начало') . $links;
 
-            # Если текущая страница не первая
-            if ($this->current_page < $this->amount)
+            # Если текущая страница не последняя
+            if ($this->current_page <= $this->amount)
             # Создаём ссылку "На последнюю"
-                $links .= $this->generateHtml($this->amount, '&gt;');
+                $links .= $this->generateHtml($this->amount, 'В конец');
         }
 
         $html .= $links . '</ul>';

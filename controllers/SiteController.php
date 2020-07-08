@@ -8,11 +8,13 @@ class SiteController
 
     /**
      * Action for main page
+     * @param int $page
+     * @return bool
      */
-    public function actionIndex($page = 1, $sort = 'user_name ASC')
+    public function actionIndex($page = 1) // un-asc, un-desc, e-asc, e-desc, s-asc, s-desc
     {
-        // all tasks from db
-        $tasks = Task::getTasksPerPage($page, $sort);
+        // tasks for this page
+        $tasks = Task::getTasksPerPage($page);
         $total = Task::getTasksTotalCount();
         // Pagination object
         $pagination = new Pagination($total, $page, 3, 'page-');
@@ -24,5 +26,29 @@ class SiteController
         require_once(ROOT . '/views/site/index.php');
         return true;
     }
+
+    public function actionSort($sort = 'user')
+    {
+        // start session
+        switch ($sort) {
+            case 'user':
+                if($_SESSION['sort'] == 'un-asc') $_SESSION['sort'] = 'un-desc';
+                else $_SESSION['sort'] = 'un-asc';
+                break;
+            case 'email':
+                if($_SESSION['sort'] == 'e-asc') $_SESSION['sort'] = 'e-desc';
+                else $_SESSION['sort'] = 'e-asc';
+                break;
+            case 'status':
+                if($_SESSION['sort'] == 's-asc') $_SESSION['sort'] = 's-desc';
+                else $_SESSION['sort'] = 's-asc';
+        }
+
+        // redirect
+        $referrer = $_SERVER['HTTP_REFERER'];
+        header("Location: $referrer");
+    }
+
+
 
 }
