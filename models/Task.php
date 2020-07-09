@@ -10,9 +10,8 @@ class Task
     /**
      * @return array Array of tasks per page
      */
-    public static function getTasksPerPage($page)
+    public static function getTasksPerPage($page, $limit)
     {
-        $limit = 3;
         $offset = ($page - 1) * $limit;
         $sort = 'un-asc';
         if(isset($_SESSION['sort'])) $sort = $_SESSION['sort'];
@@ -42,10 +41,12 @@ class Task
         $i = 0;
         $tasks = array();
         while ($row = $result->fetch()) {
+            $tasks[$i]['id'] = $row['id'];
             $tasks[$i]['user_name'] = $row['user_name'];
             $tasks[$i]['email'] = $row['email'];
             $tasks[$i]['text'] = $row['text'];
             $tasks[$i]['status'] = $row['status'];
+            $tasks[$i]['is_edited'] = $row['is_edited'];
             $i++;
         }
         return $tasks;
@@ -62,10 +63,25 @@ class Task
 
         // query to db
         $result = $db->query('SELECT count(id) AS count FROM task');
+        $result->execute();
         $row = $result->fetch();
         return $row['count'];
     }
 
+
+
+
+    public static function getTaskById($id)
+    {
+        $db = Db::getConnection();
+
+        $sql = 'SELECT * FROM task WHERE id = :id';
+        $result = $db->prepare($sql);
+        $result->bindParam(':id', $id, PDO::PARAM_INT);
+        $result->setFetchMode(PDO::FETCH_ASSOC);
+        $result->execute();
+        return $result->fetch();
+    }
 
 
 
@@ -74,7 +90,7 @@ class Task
         $db = Db::getConnection();
 
         $sql = 'INSERT INTO task (user_name, email, text) '
-                . 'VALUES (:user_name, :email, :text)';
+            . 'VALUES (:user_name, :email, :text)';
 
         $result = $db->prepare($sql);
         $result->bindParam(':user_name', $userName, PDO::PARAM_STR);
@@ -84,7 +100,40 @@ class Task
     }
 
 
+    public static function updateTaskById($id, $params)
+    {
+        $db = Db::getConnection();
+        $sql = 'SELECT text, is_edited FROM task WHERE id = :id';
+        $result = $db->prepare($sql);
+        $result->bindParam(':id', $id, PDO::PARAM_INT);
+        $result->setFetchMode(PDO::FETCH_ASSOC);
+        $result->execute();
+        $task = $result->fetch();
+        if ($task['text'] != $params['text']) $is_edited = 1;
+        else $is_edited = $task['is_edited'];
+        $sql = '
+            UPDATE task
+            SET text = :text,
+                status = :status,
+                is_edited = :is_edited
+            WHERE id = :id
+        ';
+        $result = $db->prepare($sql);
+        $result->bindParam(':id', $id, PDO::PARAM_INT);
+        $result->bindParam(':text', $params['text'], PDO::PARAM_STR);
+        $result->bindParam(':status', $params['status'], PDO::PARAM_INT);
+        $result->bindParam(':is_edited', $is_edited, PDO::PARAM_INT);
+        return $result->execute();
+    }
 
+    public static function deleteTaskById($id)
+    {
+        $db = Db::getConnection();
 
+        $sql = 'DELETE FROM task WHERE id = :id';
 
+        $result = $db->prepare($sql);
+        $result->bindParam(':id', $id, PDO::PARAM_INT);
+        return $result->execute();
+    }
 }

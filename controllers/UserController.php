@@ -40,8 +40,6 @@ class UserController
      */
     public function actionLogout()
     {
-        // Стартуем сессию
-        session_start();
         
         // Удаляем информацию о пользователе из сессии
         unset($_SESSION["user"]);

@@ -17,7 +17,7 @@ abstract class AdminBase
         // get user data
         $user = User::getUserById($userId);
 
-        // if Admin returns true
+        // if is Admin returns true
         if ($user['role'] == 'admin') {
             return true;
         }

@@ -35,6 +35,7 @@ class TaskController
 
             if ($errors == false) {
                 Task::createTask($userName, $email, $text);
+                $_SESSION['success'] = 'Задача добавлена!';
             }
             $_SESSION['errors'] = $errors;
         }
